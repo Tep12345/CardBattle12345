@@ -1,0 +1,9 @@
+{
+  "name": "Arcana Duel",
+  "short_name": "ArcanaDuel",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#11151c",
+  "theme_color": "#11151c",
+  "description": "A mobile-first competitive card game for Web, GitHub Pages, and future iOS packaging."
+}
