@@ -1,6 +1,6 @@
 import type { GameState } from './types';
 
-const key = 'arcana-duel-room';
+const key = 'kingdom-room';
 
 export function saveRoomSnapshot(state: GameState): void {
   localStorage.setItem(`${key}:${state.roomCode}`, JSON.stringify(state));

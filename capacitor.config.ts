@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'jp.example.arcanaduel',
-  appName: 'Arcana Duel',
+  appName: 'キングダム',
   webDir: 'dist',
   bundledWebRuntime: false,
   server: {
