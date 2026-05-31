@@ -4,6 +4,7 @@ import { elementLabel } from '../game/cards';
 import { attackLane, createGame, endTurn, playSelectedCard, runCpuTurn, selectHand } from '../game/engine';
 import { createShareUrl, loadRoomSnapshot, saveRoomSnapshot } from '../game/online';
 import type { BoardUnit, Card, GameState, Lane, PlayerId } from '../game/types';
+import cardArtSheet from '../assets/card-art-sheet.png';
 
 type ActionKind = 'shield' | 'health' | 'trap' | 'mana';
 const PLAYER_MAX_HP = 8000;
@@ -388,7 +389,7 @@ function UnitView({ unit }: { unit: BoardUnit }) {
         <span>{elementLabel[unit.card.element]}</span>
         <strong>{unit.card.cost}</strong>
       </div>
-      <span className={`kind-badge ${unit.card.kind}`}>{kind.icon} {kind.label}</span>
+      <span className={`kind-badge ${unit.card.kind}`}>{kind.label}</span>
       <CardArt card={unit.card} compact />
       <h3>{unit.card.name}</h3>
       <div className="stat-row">
@@ -418,7 +419,7 @@ function CardView({
         <span>{elementLabel[card.element]}</span>
         <strong>{card.cost}</strong>
       </div>
-      <span className={`kind-badge ${card.kind}`}>{kind.icon} {kind.label}</span>
+      <span className={`kind-badge ${card.kind}`}>{kind.label}</span>
       <CardArt card={card} compact={compact} />
       <h3>{card.name}</h3>
       {!compact && <p>{card.text}</p>}
@@ -430,30 +431,24 @@ function CardView({
   );
 }
 
-function cardKindMeta(kind: Card['kind']): { label: string; icon: string } {
-  if (kind === 'unit') return { label: '武将', icon: 'MON' };
-  if (kind === 'spell') return { label: '計略', icon: 'MAG' };
-  return { label: '罠', icon: 'TRP' };
+function cardKindMeta(kind: Card['kind']): { label: string } {
+  if (kind === 'unit') return { label: '武将' };
+  if (kind === 'spell') return { label: '計略' };
+  return { label: '罠' };
 }
 
 function CardArt({ card, compact }: { card: Card; compact?: boolean }) {
   const art = artForCard(card.id);
-  const gradientId = `sky-${card.id.replace(/[^a-z0-9-]/gi, '')}`;
 
   return (
     <div className={`card-art ${card.element} ${card.kind} ${compact ? 'compact' : ''}`} aria-hidden="true">
-      <svg viewBox="0 0 160 96" role="img">
-        <defs>
-          <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%" stopColor={art.sky[0]} />
-            <stop offset="100%" stopColor={art.sky[1]} />
-          </linearGradient>
-        </defs>
-        <rect width="160" height="96" rx="10" fill={`url(#${gradientId})`} />
-        <path d="M0 72 C32 54 52 70 79 55 C111 38 126 64 160 48 L160 96 L0 96 Z" fill="rgba(8,12,16,.34)" />
-        <path d="M0 82 C34 69 62 84 90 68 C116 53 137 71 160 60 L160 96 L0 96 Z" fill="rgba(255,255,255,.16)" />
-        <CardIllustration type={art.type} />
-      </svg>
+      <span
+        className="art-image"
+        style={{
+          backgroundImage: `url(${cardArtSheet})`,
+          backgroundPosition: art.position,
+        }}
+      />
       <span className="art-caption">{art.label}</span>
     </div>
   );
@@ -461,103 +456,14 @@ function CardArt({ card, compact }: { card: Card; compact?: boolean }) {
 
 type ArtType = 'scout' | 'strategist' | 'guardian' | 'cavalry' | 'dragon' | 'flame' | 'scroll' | 'supply' | 'trap';
 
-function artForCard(cardId: string): { type: ArtType; label: string; sky: [string, string] } {
-  if (cardId.startsWith('ember-scout')) return { type: 'scout', label: '若き斥候', sky: ['#e96b3a', '#582217'] };
-  if (cardId.startsWith('tide-adept')) return { type: 'strategist', label: '水軍の軍師', sky: ['#45a6bc', '#173f58'] };
-  if (cardId.startsWith('terra-warden')) return { type: 'guardian', label: '盾の守将', sky: ['#85b968', '#1d4b34'] };
-  if (cardId.startsWith('volt-runner')) return { type: 'cavalry', label: '雷騎兵', sky: ['#f0c84d', '#604c13'] };
-  if (cardId.startsWith('void-dragon')) return { type: 'dragon', label: '黒星龍', sky: ['#a37ac1', '#251c3d'] };
-  if (cardId.startsWith('ember-burst')) return { type: 'flame', label: '火矢の号令', sky: ['#f07a34', '#5d1818'] };
-  if (cardId.startsWith('tide-recall')) return { type: 'scroll', label: '兵法の巻物', sky: ['#6bc5d8', '#244c6b'] };
-  if (cardId.startsWith('terra-root')) return { type: 'supply', label: '補給陣', sky: ['#8fbf61', '#285437'] };
-  return { type: 'trap', label: '反鏡陣', sky: ['#8f75a8', '#282038'] };
-}
-
-function CardIllustration({ type }: { type: ArtType }) {
-  if (type === 'scout') {
-    return (
-      <g className="ink-figure scout">
-        <path d="M76 35 l16 18 l-10 4 l-11 -13 Z" />
-        <circle cx="70" cy="31" r="9" />
-        <path d="M61 43 h30 l-6 34 h-21 Z" />
-        <path d="M54 52 l-22 12 M88 51 l26 -19 M112 31 l12 3" />
-      </g>
-    );
-  }
-  if (type === 'strategist') {
-    return (
-      <g className="ink-figure strategist">
-        <circle cx="78" cy="31" r="8" />
-        <path d="M61 47 q17 -19 35 0 l5 31 h-45 Z" />
-        <path d="M45 63 q35 -18 70 0" />
-        <path d="M43 69 q37 -18 74 0" />
-        <path d="M103 36 l22 -12 l-5 24 Z" />
-      </g>
-    );
-  }
-  if (type === 'guardian') {
-    return (
-      <g className="ink-figure guardian">
-        <path d="M58 35 l22 -13 l23 13 v20 q0 21 -23 31 q-22 -10 -22 -31 Z" />
-        <path d="M80 28 v49 M63 49 h34" />
-        <circle cx="80" cy="42" r="6" />
-      </g>
-    );
-  }
-  if (type === 'cavalry') {
-    return (
-      <g className="ink-figure cavalry">
-        <path d="M45 62 q28 -30 68 -4 l17 18 h-32 l-10 -10 h-28 l-12 10 h-25 Z" />
-        <circle cx="112" cy="48" r="8" />
-        <path d="M78 35 l10 18 l-15 5 l-10 -15 Z" />
-        <path d="M88 29 l32 -15 M119 14 l8 9" />
-      </g>
-    );
-  }
-  if (type === 'dragon') {
-    return (
-      <g className="ink-figure dragon">
-        <path d="M34 64 q20 -40 51 -15 q18 14 36 -14 q5 25 -17 37 q-24 13 -45 -4 q-11 -9 -25 -4 Z" />
-        <path d="M109 35 l18 -11 l-5 20 Z" />
-        <path d="M53 50 q8 -19 25 -28 M72 70 q-3 13 -17 18" />
-        <circle cx="113" cy="39" r="3" />
-      </g>
-    );
-  }
-  if (type === 'flame') {
-    return (
-      <g className="ink-figure flame">
-        <path d="M79 82 q-26 -16 -10 -39 q7 -9 5 -22 q22 14 16 31 q13 -7 17 -21 q18 28 -3 47 q-11 10 -25 4 Z" />
-        <path d="M34 68 l90 -42 M118 24 l12 3 M116 25 l7 -10" />
-        <path d="M43 76 l78 -31" />
-      </g>
-    );
-  }
-  if (type === 'scroll') {
-    return (
-      <g className="ink-figure scroll">
-        <path d="M48 32 h63 q-10 8 0 16 v31 h-63 q10 -8 0 -16 Z" />
-        <path d="M60 48 h40 M60 58 h32 M60 68 h45" />
-        <circle cx="48" cy="32" r="8" />
-        <circle cx="48" cy="79" r="8" />
-      </g>
-    );
-  }
-  if (type === 'supply') {
-    return (
-      <g className="ink-figure supply">
-        <path d="M39 68 h82 v17 h-82 Z" />
-        <path d="M52 43 h56 l8 25 h-72 Z" />
-        <path d="M68 43 v-18 h24 v18" />
-        <path d="M58 56 h44 M64 68 v17 M96 68 v17" />
-      </g>
-    );
-  }
-  return (
-    <g className="ink-figure trap">
-      <path d="M80 23 l45 25 l-45 26 l-45 -26 Z" />
-      <path d="M80 38 l20 10 l-20 11 l-20 -11 Z" />
-      <path d="M35 48 h-17 M125 48 h17 M80 23 v-15 M80 74 v14" />
-    </g>
-  );
+function artForCard(cardId: string): { type: ArtType; label: string; position: string } {
+  if (cardId.startsWith('ember-scout')) return { type: 'scout', label: '若き斥候', position: '0% 0%' };
+  if (cardId.startsWith('tide-adept')) return { type: 'strategist', label: '水軍の軍師', position: '50% 0%' };
+  if (cardId.startsWith('terra-warden')) return { type: 'guardian', label: '盾の守将', position: '100% 0%' };
+  if (cardId.startsWith('volt-runner')) return { type: 'cavalry', label: '雷騎兵', position: '0% 50%' };
+  if (cardId.startsWith('void-dragon')) return { type: 'dragon', label: '黒星龍', position: '50% 50%' };
+  if (cardId.startsWith('ember-burst')) return { type: 'flame', label: '火矢の号令', position: '100% 50%' };
+  if (cardId.startsWith('tide-recall')) return { type: 'scroll', label: '兵法の巻物', position: '0% 100%' };
+  if (cardId.startsWith('terra-root')) return { type: 'supply', label: '補給陣', position: '50% 100%' };
+  return { type: 'trap', label: '反鏡陣', position: '100% 100%' };
 }
