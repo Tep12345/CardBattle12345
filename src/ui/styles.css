@@ -339,7 +339,10 @@ button:disabled {
   grid-template-columns: repeat(10, 1fr);
 }
 
-.resource-meter.life .resource-pips,
+.resource-meter.life .resource-pips {
+  grid-template-columns: repeat(8, 1fr);
+}
+
 .resource-meter.shield .resource-pips {
   grid-template-columns: repeat(5, 1fr);
 }
@@ -522,12 +525,34 @@ button:disabled {
 
 .card-topline span,
 .card-topline strong,
-.stat-row span {
+.stat-row span,
+.kind-badge {
   background: rgba(0, 0, 0, 0.24);
   border-radius: 999px;
   padding: 3px 8px;
   font-size: 0.75rem;
   white-space: nowrap;
+}
+
+.kind-badge {
+  width: fit-content;
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: 0;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.16);
+}
+
+.kind-badge.unit {
+  background: linear-gradient(135deg, rgba(182, 55, 35, 0.96), rgba(88, 30, 21, 0.96));
+}
+
+.kind-badge.spell {
+  background: linear-gradient(135deg, rgba(36, 113, 158, 0.96), rgba(20, 49, 82, 0.96));
+}
+
+.kind-badge.trap {
+  background: linear-gradient(135deg, rgba(120, 72, 158, 0.96), rgba(48, 30, 70, 0.96));
 }
 
 .unit-card h3,

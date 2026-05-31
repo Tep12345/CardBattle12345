@@ -2,6 +2,10 @@ import { buildStarterDeck, elementBeats } from './cards';
 import type { BoardUnit, Card, GameState, Lane, PlayerId, PlayerState } from './types';
 
 const lanes: Array<BoardUnit | null> = [null, null, null];
+const PLAYER_MAX_HP = 8000;
+const SUMMON_DAMAGE = 500;
+const ELEMENT_BONUS = 500;
+const DIRECT_SPELL_DAMAGE = 1000;
 
 function shuffle<T>(items: T[]): T[] {
   return [...items].sort(() => Math.random() - 0.5);
@@ -33,7 +37,7 @@ function createPlayer(id: PlayerId, name: string): PlayerState {
   const base: PlayerState = {
     id,
     name,
-    health: 5,
+    health: PLAYER_MAX_HP,
     mana: 1,
     deck,
     hand: [],
@@ -58,7 +62,7 @@ export function createGame(mode: GameState['mode'] = 'cpu'): GameState {
     winner: null,
     selectedHandIndex: null,
     selectedLane: null,
-    log: ['ゲーム開始。マナは毎ターン+1、相手のシールドをすべて割ると勝利です。'],
+    log: ['ゲーム開始。HPは8000。シールドを割り切り、直接攻撃で相手HPを0にすると勝利です。'],
     mode,
     roomCode,
   };
@@ -132,7 +136,7 @@ export function playSelectedCard(state: GameState, lane: Lane): GameState {
       const enemyLane = firstOccupiedLane(nextEnemy);
       if (enemyLane !== null) {
         const enemyLanes = [...nextEnemy.lanes];
-        enemyLanes[enemyLane] = dealUnitDamage(enemyLanes[enemyLane]!, 1);
+        enemyLanes[enemyLane] = dealUnitDamage(enemyLanes[enemyLane]!, SUMMON_DAMAGE);
         nextEnemy = { ...nextEnemy, lanes: enemyLanes };
       }
     }
@@ -147,7 +151,7 @@ export function playSelectedCard(state: GameState, lane: Lane): GameState {
         enemyLanes[enemyLane] = dealUnitDamage(enemyLanes[enemyLane]!, card.power);
         nextEnemy = { ...nextEnemy, lanes: enemyLanes };
       } else {
-        nextEnemy = breakShield(nextEnemy);
+        nextEnemy = breakShield(nextEnemy, DIRECT_SPELL_DAMAGE);
       }
     }
     if (card.id.includes('tide-recall')) nextActive = draw(nextActive, 2);
@@ -164,10 +168,10 @@ export function playSelectedCard(state: GameState, lane: Lane): GameState {
   return checkWinner(appendLog(nextState, `${active.name} は ${card.name} を使用。`));
 }
 
-function breakShield(player: PlayerState): PlayerState {
+function breakShield(player: PlayerState, damage: number): PlayerState {
   const shields = [...player.shields];
   const shield = shields.shift();
-  if (!shield) return { ...player, health: player.health - 1 };
+  if (!shield) return { ...player, health: player.health - damage };
   const hand = shield.trigger === 'onBreak' ? [...player.hand, shield] : player.hand;
   const discard = shield.trigger === 'onBreak' ? player.discard : [...player.discard, shield];
   return { ...player, shields, hand, discard };
@@ -191,14 +195,14 @@ export function attackLane(state: GameState, lane: Lane): GameState {
   }
 
   if (blocker && nextAttacker) {
-    const bonus = elementBeats[attacker.card.element] === blocker.card.element ? 1 : 0;
+    const bonus = elementBeats[attacker.card.element] === blocker.card.element ? ELEMENT_BONUS : 0;
     const enemyLanes = [...nextEnemy.lanes];
     enemyLanes[lane] = dealUnitDamage(blocker, attackPower + bonus);
     nextEnemy = { ...nextEnemy, lanes: enemyLanes };
     attackPower = blocker.card.power;
     nextAttacker = dealUnitDamage(nextAttacker, attackPower);
   } else if (nextAttacker) {
-    nextEnemy = breakShield(nextEnemy);
+    nextEnemy = breakShield(nextEnemy, attackPower);
   }
 
   let nextActive = active;

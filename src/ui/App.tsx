@@ -6,6 +6,7 @@ import { createShareUrl, loadRoomSnapshot, saveRoomSnapshot } from '../game/onli
 import type { BoardUnit, Card, GameState, Lane, PlayerId } from '../game/types';
 
 type ActionKind = 'shield' | 'health' | 'trap' | 'mana';
+const PLAYER_MAX_HP = 8000;
 
 interface ActionEffect {
   id: string;
@@ -243,7 +244,7 @@ function RulesDialog({ onClose }: { onClose: () => void }) {
         <div className="rules-content">
           <section>
             <h3>勝利条件</h3>
-            <p>相手のシールドをすべて割り、その後さらに攻撃してライフを0にすると勝利です。</p>
+            <p>相手のシールドをすべて割り、その後さらに攻撃してHP8000を0にすると勝利です。</p>
           </section>
 
           <section>
@@ -260,15 +261,15 @@ function RulesDialog({ onClose }: { onClose: () => void }) {
             <h3>カード種別</h3>
             <dl>
               <div>
-                <dt>Unit</dt>
-                <dd>レーンに残って戦うカードです。表示は ATK/HP です。</dd>
+                <dt>武将</dt>
+                <dd>レーンに残って戦うモンスター系カードです。表示は ATK/HP です。</dd>
               </div>
               <div>
-                <dt>Spell</dt>
+                <dt>計略</dt>
                 <dd>使うとすぐ効果を発揮し、捨て札に置かれます。</dd>
               </div>
               <div>
-                <dt>Trap</dt>
+                <dt>罠</dt>
                 <dd>伏せておき、次に攻撃された時に攻撃ユニットへ反撃します。</dd>
               </div>
             </dl>
@@ -277,7 +278,7 @@ function RulesDialog({ onClose }: { onClose: () => void }) {
           <section>
             <h3>重要な戦術</h3>
             <ul>
-              <li>火は森、森は雷、雷は水、水は火に強く、戦闘ダメージが+1されます。</li>
+              <li>火は森、森は雷、雷は水、水は火に強く、戦闘ダメージが+500されます。</li>
               <li>既にユニットがいるレーンに進化ユニットを重ねると、コストが下がります。</li>
               <li>雷の速攻ユニットは出したターンから攻撃できます。</li>
               <li>シールドを守りたい時は、耐久の高いユニットを同じレーンに置きます。</li>
@@ -297,7 +298,7 @@ function PlayerBadge({ side, state, effects }: { side: PlayerId; state: GameStat
         <strong>{player.name}</strong>
       </div>
       <div className="badge-resources">
-        <ResourceMeter icon="life" label="HP" current={player.health} max={5} flash={hasEffect(effects, `${side}-health`)} />
+        <ResourceMeter icon="life" label="HP" current={player.health} max={PLAYER_MAX_HP} flash={hasEffect(effects, `${side}-health`)} />
         <ResourceMeter icon="mana" label="Mana" current={player.mana} max={10} flash={hasEffect(effects, `${side}-mana`)} />
         <ResourceMeter icon="shield" label="Shield" current={player.shields.length} max={5} flash={hasEffect(effects, `${side}-shield`)} />
       </div>
@@ -318,6 +319,9 @@ function ResourceMeter({
   max: number;
   flash?: boolean;
 }) {
+  const pipCount = icon === 'life' ? 8 : max;
+  const filledPips = Math.max(0, Math.ceil((Math.max(current, 0) / max) * pipCount));
+
   return (
     <div className={`resource-meter ${icon} ${flash ? 'flash' : ''}`} aria-label={`${label} ${current}/${max}`}>
       <div className="resource-label">
@@ -330,8 +334,8 @@ function ResourceMeter({
         </strong>
       </div>
       <div className="resource-pips" aria-hidden="true">
-        {Array.from({ length: max }, (_, index) => (
-          <span key={index} className={index < current ? 'filled' : ''} />
+        {Array.from({ length: pipCount }, (_, index) => (
+          <span key={index} className={index < filledPips ? 'filled' : ''} />
         ))}
       </div>
     </div>
@@ -377,12 +381,14 @@ function PlayerBoard({ playerId, state, effects }: { playerId: PlayerId; state: 
 
 function UnitView({ unit }: { unit: BoardUnit }) {
   const hp = unit.card.shield - unit.damage;
+  const kind = cardKindMeta(unit.card.kind);
   return (
     <div className={`unit-card ${unit.card.element} ${unit.exhausted ? 'exhausted' : ''}`}>
       <div className="card-topline">
         <span>{elementLabel[unit.card.element]}</span>
         <strong>{unit.card.cost}</strong>
       </div>
+      <span className={`kind-badge ${unit.card.kind}`}>{kind.icon} {kind.label}</span>
       <CardArt card={unit.card} compact />
       <h3>{unit.card.name}</h3>
       <div className="stat-row">
@@ -404,21 +410,30 @@ function CardView({
   selected?: boolean;
   onClick?: () => void;
 }) {
+  const kind = cardKindMeta(card.kind);
+
   return (
     <button className={`hand-card ${card.element} ${selected ? 'selected' : ''}`} onClick={onClick}>
       <div className="card-topline">
         <span>{elementLabel[card.element]}</span>
         <strong>{card.cost}</strong>
       </div>
+      <span className={`kind-badge ${card.kind}`}>{kind.icon} {kind.label}</span>
       <CardArt card={card} compact={compact} />
       <h3>{card.name}</h3>
       {!compact && <p>{card.text}</p>}
       <div className="stat-row">
-        <span>{card.kind}</span>
+        <span>{kind.label}</span>
         <span>{card.kind === 'unit' ? `${card.power}/${card.shield}` : card.power ? `+${card.power}` : 'skill'}</span>
       </div>
     </button>
   );
+}
+
+function cardKindMeta(kind: Card['kind']): { label: string; icon: string } {
+  if (kind === 'unit') return { label: '武将', icon: 'MON' };
+  if (kind === 'spell') return { label: '計略', icon: 'MAG' };
+  return { label: '罠', icon: 'TRP' };
 }
 
 function CardArt({ card, compact }: { card: Card; compact?: boolean }) {
