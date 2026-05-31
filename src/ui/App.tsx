@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bot, Copy, HelpCircle, RotateCcw, Share2, Shield, Swords, Wifi, X } from 'lucide-react';
+import { Bot, Copy, Gem, HelpCircle, RotateCcw, Share2, Shield, Swords, Wifi, X } from 'lucide-react';
 import { elementLabel } from '../game/cards';
 import { attackLane, createGame, endTurn, playSelectedCard, runCpuTurn, selectHand } from '../game/engine';
 import { createShareUrl, loadRoomSnapshot, saveRoomSnapshot } from '../game/online';
@@ -116,6 +116,7 @@ export function App() {
             <p className="eyebrow">Hand</p>
             <h2>{selected ? `${selected.name} を配置` : 'カードを選択'}</h2>
           </div>
+          <ManaPanel current={player.mana} />
           <button disabled={!canAct} onClick={() => setGame((current) => endTurn(current))}>
             ターン終了
           </button>
@@ -222,11 +223,31 @@ function PlayerBadge({ side, state }: { side: PlayerId; state: GameState }) {
     <div className={`player-badge ${state.activePlayer === side ? 'current' : ''}`}>
       <div>
         <strong>{player.name}</strong>
-        <span>Mana {player.mana}/10</span>
+        <span className="badge-mana">
+          <Gem size={14} />
+          Mana {player.mana}/10
+        </span>
       </div>
       <div className="shield-count">
         <Shield size={16} />
         <span>{player.shields.length}</span>
+      </div>
+    </div>
+  );
+}
+
+function ManaPanel({ current }: { current: number }) {
+  return (
+    <div className="mana-panel" aria-label={`現在のマナ ${current}`}>
+      <div className="mana-head">
+        <Gem size={16} />
+        <strong>{current}</strong>
+        <span>/10</span>
+      </div>
+      <div className="mana-gems" aria-hidden="true">
+        {Array.from({ length: 10 }, (_, index) => (
+          <span key={index} className={index < current ? 'filled' : ''} />
+        ))}
       </div>
     </div>
   );
@@ -260,6 +281,7 @@ function UnitView({ unit }: { unit: BoardUnit }) {
         <span>{elementLabel[unit.card.element]}</span>
         <strong>{unit.card.cost}</strong>
       </div>
+      <CardArt card={unit.card} compact />
       <h3>{unit.card.name}</h3>
       <div className="stat-row">
         <span>ATK {unit.card.power}</span>
@@ -286,6 +308,7 @@ function CardView({
         <span>{elementLabel[card.element]}</span>
         <strong>{card.cost}</strong>
       </div>
+      <CardArt card={card} compact={compact} />
       <h3>{card.name}</h3>
       {!compact && <p>{card.text}</p>}
       <div className="stat-row">
@@ -293,5 +316,16 @@ function CardView({
         <span>{card.kind === 'unit' ? `${card.power}/${card.shield}` : card.power ? `+${card.power}` : 'skill'}</span>
       </div>
     </button>
+  );
+}
+
+function CardArt({ card, compact }: { card: Card; compact?: boolean }) {
+  return (
+    <div className={`card-art ${card.element} ${card.kind} ${compact ? 'compact' : ''}`} aria-hidden="true">
+      <span className="art-sigil">{card.kind === 'trap' ? '◇' : card.kind === 'spell' ? '✦' : '◆'}</span>
+      <span className="art-character" />
+      <span className="art-orbit one" />
+      <span className="art-orbit two" />
+    </div>
   );
 }

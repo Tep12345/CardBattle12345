@@ -27,6 +27,40 @@ button {
   font: inherit;
 }
 
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes mana-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.16);
+  }
+}
+
+@keyframes art-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
 .shell {
   width: min(1180px, 100%);
   margin: 0 auto;
@@ -99,6 +133,10 @@ h2 {
   background: #24313c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
 }
 
 .toolbar button.active,
@@ -106,6 +144,20 @@ h2 {
 .panel-header button:hover {
   background: #d9a441;
   color: #16130d;
+}
+
+.toolbar button:hover,
+.room-band button:hover,
+.lane-actions button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.toolbar button:active,
+.room-band button:active,
+.lane-actions button:not(:disabled):active,
+.summon-row button:not(:disabled):active,
+.panel-header button:not(:disabled):active {
+  transform: translateY(1px) scale(0.98);
 }
 
 button:disabled {
@@ -145,6 +197,12 @@ button:disabled {
   display: grid;
   gap: 2px;
   min-width: 0;
+}
+
+.badge-mana {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .player-badge span,
@@ -241,15 +299,30 @@ button:disabled {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
   text-align: left;
   overflow: hidden;
+  position: relative;
+  animation: card-enter 220ms ease both;
 }
 
 .hand-card {
-  min-width: 150px;
+  min-width: 172px;
   cursor: pointer;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    outline-color 180ms ease;
 }
 
 .hand-card.selected {
   outline: 3px solid #f1cf88;
+  transform: translateY(-7px);
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(241, 207, 136, 0.52);
+}
+
+.hand-card:not(.selected):hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
 }
 
 .ember {
@@ -274,7 +347,7 @@ button:disabled {
 }
 
 .exhausted {
-  transform: rotate(2deg);
+  transform: rotate(2deg) scale(0.97);
   opacity: 0.62;
 }
 
@@ -320,6 +393,52 @@ button:disabled {
   gap: 12px;
 }
 
+.mana-panel {
+  min-width: 168px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(217, 164, 65, 0.18), rgba(80, 137, 158, 0.16)),
+    rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(241, 207, 136, 0.24);
+}
+
+.mana-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #f1cf88;
+  line-height: 1;
+}
+
+.mana-head strong {
+  font-size: 1.28rem;
+}
+
+.mana-head span {
+  color: #afbdc8;
+  font-size: 0.78rem;
+}
+
+.mana-gems {
+  margin-top: 7px;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
+}
+
+.mana-gems span {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.mana-gems span.filled {
+  background: linear-gradient(180deg, #ffe39b, #d9a441);
+  box-shadow: 0 0 10px rgba(217, 164, 65, 0.52);
+  animation: mana-pop 260ms ease both;
+}
+
 .hand {
   display: flex;
   gap: 10px;
@@ -330,6 +449,128 @@ button:disabled {
 
 .hand-card {
   scroll-snap-align: start;
+}
+
+.card-art {
+  min-height: 76px;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 70% 25%, rgba(255, 255, 255, 0.44), transparent 18px),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.28), rgba(0, 0, 0, 0.16));
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.card-art.compact {
+  min-height: 52px;
+}
+
+.art-character {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 52px;
+  height: 48px;
+  transform: translateX(-50%);
+  border-radius: 46% 46% 34% 34%;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.92) 0 10px, transparent 11px),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.74), rgba(14, 18, 24, 0.18));
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.24);
+  animation: art-drift 3s ease-in-out infinite;
+}
+
+.art-character::before,
+.art-character::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  width: 22px;
+  height: 30px;
+  border-radius: 16px 16px 4px 4px;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.art-character::before {
+  left: -14px;
+  transform: rotate(-22deg);
+}
+
+.art-character::after {
+  right: -14px;
+  transform: rotate(22deg);
+}
+
+.art-sigil {
+  position: absolute;
+  top: 7px;
+  left: 8px;
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.84);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.34);
+}
+
+.art-orbit {
+  position: absolute;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+}
+
+.art-orbit.one {
+  right: -16px;
+  bottom: -10px;
+  width: 58px;
+  height: 58px;
+}
+
+.art-orbit.two {
+  right: 18px;
+  top: 16px;
+  width: 24px;
+  height: 24px;
+}
+
+.card-art.ember .art-character {
+  background:
+    radial-gradient(circle at 50% 18%, #ffe0b0 0 10px, transparent 11px),
+    linear-gradient(145deg, #ffc266, #8d2f20);
+}
+
+.card-art.tide .art-character {
+  background:
+    radial-gradient(circle at 50% 18%, #d8f8ff 0 10px, transparent 11px),
+    linear-gradient(145deg, #92e4ef, #15506b);
+}
+
+.card-art.terra .art-character {
+  background:
+    radial-gradient(circle at 50% 18%, #f1ffd8 0 10px, transparent 11px),
+    linear-gradient(145deg, #b2db76, #1f5c39);
+}
+
+.card-art.volt .art-character {
+  background:
+    radial-gradient(circle at 50% 18%, #fff4bb 0 10px, transparent 11px),
+    linear-gradient(145deg, #ffe06d, #886d17);
+}
+
+.card-art.void .art-character {
+  background:
+    radial-gradient(circle at 50% 18%, #f0e5ff 0 10px, transparent 11px),
+    linear-gradient(145deg, #b995d0, #32264d);
+}
+
+.card-art.spell .art-character {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.card-art.trap .art-character {
+  width: 58px;
+  height: 34px;
+  border-radius: 8px 8px 18px 18px;
 }
 
 .summon-row {
@@ -358,6 +599,7 @@ button:disabled {
   place-items: center;
   padding: 18px;
   background: rgba(6, 8, 12, 0.72);
+  animation: card-enter 160ms ease both;
 }
 
 .rules-dialog {
@@ -368,6 +610,7 @@ button:disabled {
   border-radius: 8px;
   background: #151b23;
   box-shadow: 0 22px 80px rgba(0, 0, 0, 0.42);
+  animation: card-enter 180ms ease both;
 }
 
 .rules-titlebar {
@@ -466,6 +709,7 @@ button:disabled {
 
   .toolbar button {
     flex: 1;
+    padding: 0 8px;
   }
 
   .status-grid {
@@ -483,6 +727,19 @@ button:disabled {
   .unit-card {
     min-height: 116px;
     padding: 8px;
+  }
+
+  .panel-header {
+    flex-wrap: wrap;
+  }
+
+  .mana-panel {
+    order: 3;
+    width: 100%;
+  }
+
+  .hand-card {
+    min-width: 164px;
   }
 
   .rules-backdrop {
