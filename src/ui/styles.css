@@ -17,8 +17,22 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(193, 70, 48, 0.24), transparent 34rem),
-    linear-gradient(135deg, #11151c 0%, #1f2a2f 45%, #2c2023 100%);
+    linear-gradient(135deg, rgba(115, 35, 28, 0.38) 0 18%, transparent 18% 100%),
+    linear-gradient(215deg, rgba(24, 105, 112, 0.32) 0 22%, transparent 22% 100%),
+    linear-gradient(180deg, #171216 0%, #111821 42%, #161b17 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.65), transparent 78%);
 }
 
 button {
@@ -134,6 +148,7 @@ button {
   padding: max(18px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
   display: grid;
   gap: 14px;
+  position: relative;
 }
 
 .topbar,
@@ -141,18 +156,26 @@ button {
 .room-band,
 .hand-panel,
 .log-panel {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(18, 23, 31, 0.78);
-  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025)),
+    rgba(16, 20, 25, 0.82);
+  backdrop-filter: blur(20px);
   border-radius: 8px;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px;
+  padding: 12px 14px;
   gap: 12px;
+  position: sticky;
+  top: 8px;
+  z-index: 12;
 }
 
 .eyebrow {
@@ -171,7 +194,9 @@ p {
 }
 
 h1 {
-  font-size: clamp(1.3rem, 5vw, 2.1rem);
+  font-size: clamp(1.15rem, 4vw, 1.85rem);
+  letter-spacing: 0;
+  line-height: 1.05;
 }
 
 h2 {
@@ -209,8 +234,9 @@ h2 {
 .toolbar button.active,
 .summon-row button:hover,
 .panel-header button:hover {
-  background: #d9a441;
+  background: linear-gradient(180deg, #f0c86a, #bd7d25);
   color: #16130d;
+  border-color: rgba(255, 231, 161, 0.62);
 }
 
 .toolbar button:hover,
@@ -234,9 +260,9 @@ button:disabled {
 
 .status-grid {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  padding: 10px;
+  padding: 12px;
   gap: 10px;
 }
 
@@ -251,9 +277,12 @@ button:disabled {
 
 .player-badge {
   min-width: 0;
-  padding: 10px;
+  padding: 11px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025)),
+    rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .player-badge.current {
@@ -271,6 +300,10 @@ button:disabled {
   display: grid;
   gap: 2px;
   min-width: 0;
+}
+
+.player-nameplate strong {
+  font-size: 1.02rem;
 }
 
 .badge-resources {
@@ -378,7 +411,14 @@ button:disabled {
 
 .turn-pill {
   justify-content: center;
+  min-width: 112px;
+  padding: 9px 12px;
+  border-radius: 8px;
   color: #f1cf88;
+  background:
+    linear-gradient(180deg, rgba(217, 164, 65, 0.18), rgba(0, 0, 0, 0.16)),
+    rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(241, 207, 136, 0.22);
 }
 
 .room-band {
@@ -398,7 +438,17 @@ button:disabled {
 
 .battlefield {
   display: grid;
-  gap: 10px;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  background:
+    linear-gradient(90deg, rgba(217, 164, 65, 0.18) 0 1px, transparent 1px 33%, rgba(217, 164, 65, 0.14) 33% calc(33% + 1px), transparent calc(33% + 1px) 66%, rgba(217, 164, 65, 0.14) 66% calc(66% + 1px), transparent calc(66% + 1px)),
+    linear-gradient(180deg, rgba(130, 42, 34, 0.2), rgba(27, 58, 60, 0.18) 48%, rgba(31, 69, 46, 0.2)),
+    rgba(8, 11, 15, 0.48);
+  box-shadow:
+    inset 0 0 56px rgba(0, 0, 0, 0.28),
+    0 20px 45px rgba(0, 0, 0, 0.24);
 }
 
 .board {
@@ -417,6 +467,7 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   gap: 8px;
+  padding: 0 3px;
 }
 
 .lanes {
@@ -426,14 +477,17 @@ button:disabled {
 }
 
 .lane {
-  min-height: 148px;
-  border: 1px dashed rgba(255, 255, 255, 0.16);
+  min-height: 154px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
   display: grid;
   place-items: center;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
-    rgba(6, 8, 12, 0.32);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02)),
+    linear-gradient(180deg, rgba(20, 26, 34, 0.52), rgba(8, 10, 12, 0.46));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -18px 30px rgba(0, 0, 0, 0.18);
 }
 
 .empty {
@@ -443,10 +497,13 @@ button:disabled {
 
 .lane-actions {
   justify-content: center;
+  padding: 2px 0;
 }
 
 .lane-actions button {
-  width: 64px;
+  width: 72px;
+  background: linear-gradient(180deg, rgba(196, 68, 48, 0.88), rgba(90, 28, 24, 0.88));
+  border-color: rgba(255, 177, 122, 0.26);
 }
 
 .unit-card,
@@ -458,8 +515,10 @@ button:disabled {
   display: grid;
   align-content: space-between;
   gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 14px 24px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   text-align: left;
   overflow: hidden;
   position: relative;
@@ -467,7 +526,7 @@ button:disabled {
 }
 
 .hand-card {
-  min-width: 172px;
+  min-width: 178px;
   cursor: pointer;
   transition:
     transform 180ms ease,
@@ -489,24 +548,34 @@ button:disabled {
 }
 
 .ember {
-  background: linear-gradient(145deg, #7d2d22, #d85932);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 34%),
+    linear-gradient(145deg, #7d2d22, #d85932);
 }
 
 .tide {
-  background: linear-gradient(145deg, #184b64, #3c91a8);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 34%),
+    linear-gradient(145deg, #184b64, #3c91a8);
 }
 
 .terra {
-  background: linear-gradient(145deg, #214d35, #74a35a);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 34%),
+    linear-gradient(145deg, #214d35, #74a35a);
 }
 
 .volt {
-  background: linear-gradient(145deg, #5a4c16, #e2bb43);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 34%),
+    linear-gradient(145deg, #5a4c16, #e2bb43);
   color: #19150b;
 }
 
 .void {
-  background: linear-gradient(145deg, #322b46, #8d6aa5);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 34%),
+    linear-gradient(145deg, #322b46, #8d6aa5);
 }
 
 .exhausted {
@@ -532,6 +601,7 @@ button:disabled {
   padding: 3px 8px;
   font-size: 0.75rem;
   white-space: nowrap;
+  backdrop-filter: blur(8px);
 }
 
 .kind-badge {
@@ -573,9 +643,10 @@ button:disabled {
 }
 
 .hand-panel {
-  padding: 12px;
+  padding: 13px;
   display: grid;
   gap: 12px;
+  position: relative;
 }
 
 .mana-panel {
@@ -586,6 +657,7 @@ button:disabled {
     linear-gradient(135deg, rgba(217, 164, 65, 0.18), rgba(80, 137, 158, 0.16)),
     rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(241, 207, 136, 0.24);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .mana-panel.flash {
@@ -641,14 +713,15 @@ button:disabled {
 }
 
 .card-art {
-  min-height: 76px;
+  min-height: 82px;
   border-radius: 8px;
   position: relative;
   overflow: hidden;
   background:
     radial-gradient(circle at 70% 25%, rgba(255, 255, 255, 0.44), transparent 18px),
     linear-gradient(145deg, rgba(255, 255, 255, 0.28), rgba(0, 0, 0, 0.16));
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.16);
 }
 
 .card-art.compact {
@@ -839,6 +912,8 @@ button:disabled {
   padding: 12px;
   display: grid;
   gap: 7px;
+  max-height: 520px;
+  overflow: auto;
 }
 
 .log-panel strong {
@@ -985,6 +1060,11 @@ button:disabled {
 }
 
 @media (max-width: 720px) {
+  .shell {
+    padding-inline: 10px;
+    gap: 10px;
+  }
+
   .topbar,
   .status-grid {
     grid-template-columns: 1fr;
@@ -993,6 +1073,10 @@ button:disabled {
   .topbar {
     align-items: stretch;
     flex-direction: column;
+    top: 0;
+    border-radius: 0 0 8px 8px;
+    margin-inline: -10px;
+    padding-inline: 12px;
   }
 
   .toolbar {
@@ -1006,6 +1090,7 @@ button:disabled {
 
   .status-grid {
     display: grid;
+    padding: 10px;
   }
 
   .player-badge {
@@ -1022,11 +1107,11 @@ button:disabled {
   }
 
   .lane {
-    min-height: 128px;
+    min-height: 134px;
   }
 
   .unit-card {
-    min-height: 116px;
+    min-height: 122px;
     padding: 8px;
   }
 
@@ -1039,8 +1124,31 @@ button:disabled {
     width: 100%;
   }
 
+  .hand-panel {
+    position: sticky;
+    bottom: 0;
+    z-index: 11;
+    margin-inline: -10px;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 0;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .hand {
+    padding-inline: 2px;
+  }
+
   .hand-card {
     min-width: 164px;
+  }
+
+  .battlefield {
+    padding: 10px;
+  }
+
+  .action-stack {
+    right: 10px;
+    bottom: calc(184px + env(safe-area-inset-bottom));
   }
 
   .rules-backdrop {
@@ -1059,6 +1167,7 @@ button:disabled {
 @media (min-width: 980px) {
   .shell {
     grid-template-columns: minmax(0, 1fr) 280px;
+    align-items: start;
   }
 
   .topbar,
