@@ -184,7 +184,7 @@ button:disabled {
 
 .player-badge {
   min-width: 0;
-  padding: 9px;
+  padding: 10px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
 }
@@ -193,16 +193,16 @@ button:disabled {
   outline: 2px solid rgba(217, 164, 65, 0.78);
 }
 
-.player-badge div:first-child {
+.player-nameplate {
   display: grid;
   gap: 2px;
   min-width: 0;
 }
 
-.badge-mana {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+.badge-resources {
+  width: min(250px, 58%);
+  display: grid;
+  gap: 7px;
 }
 
 .player-badge span,
@@ -212,12 +212,72 @@ button:disabled {
   font-size: 0.78rem;
 }
 
-.shield-count,
 .turn-pill {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   white-space: nowrap;
+}
+
+.resource-meter {
+  display: grid;
+  gap: 4px;
+}
+
+.resource-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #d6e0e7;
+  line-height: 1;
+}
+
+.resource-label span {
+  color: #d6e0e7;
+  font-size: 0.72rem;
+}
+
+.resource-label strong {
+  margin-left: auto;
+  color: #ffffff;
+  font-size: 0.78rem;
+}
+
+.resource-meter.mana .resource-label svg {
+  color: #f1cf88;
+}
+
+.resource-meter.shield .resource-label svg {
+  color: #8fc9f0;
+}
+
+.resource-pips {
+  display: grid;
+  gap: 3px;
+}
+
+.resource-meter.mana .resource-pips {
+  grid-template-columns: repeat(10, 1fr);
+}
+
+.resource-meter.shield .resource-pips {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.resource-pips span {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.resource-meter.mana .resource-pips span.filled {
+  background: linear-gradient(180deg, #ffe39b, #d9a441);
+  box-shadow: 0 0 8px rgba(217, 164, 65, 0.4);
+}
+
+.resource-meter.shield .resource-pips span.filled {
+  background: linear-gradient(180deg, #c6eeff, #5ca8d8);
+  box-shadow: 0 0 8px rgba(92, 168, 216, 0.42);
 }
 
 .turn-pill {
@@ -714,6 +774,15 @@ button:disabled {
 
   .status-grid {
     display: grid;
+  }
+
+  .player-badge {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .badge-resources {
+    width: 100%;
   }
 
   .turn-pill {

@@ -221,16 +221,41 @@ function PlayerBadge({ side, state }: { side: PlayerId; state: GameState }) {
   const player = state.players[side];
   return (
     <div className={`player-badge ${state.activePlayer === side ? 'current' : ''}`}>
-      <div>
+      <div className="player-nameplate">
         <strong>{player.name}</strong>
-        <span className="badge-mana">
-          <Gem size={14} />
-          Mana {player.mana}/10
-        </span>
       </div>
-      <div className="shield-count">
-        <Shield size={16} />
-        <span>{player.shields.length}</span>
+      <div className="badge-resources">
+        <ResourceMeter icon="mana" label="Mana" current={player.mana} max={10} />
+        <ResourceMeter icon="shield" label="Shield" current={player.shields.length} max={5} />
+      </div>
+    </div>
+  );
+}
+
+function ResourceMeter({
+  icon,
+  label,
+  current,
+  max,
+}: {
+  icon: 'mana' | 'shield';
+  label: string;
+  current: number;
+  max: number;
+}) {
+  return (
+    <div className={`resource-meter ${icon}`} aria-label={`${label} ${current}/${max}`}>
+      <div className="resource-label">
+        {icon === 'mana' ? <Gem size={14} /> : <Shield size={14} />}
+        <span>{label}</span>
+        <strong>
+          {current}/{max}
+        </strong>
+      </div>
+      <div className="resource-pips" aria-hidden="true">
+        {Array.from({ length: max }, (_, index) => (
+          <span key={index} className={index < current ? 'filled' : ''} />
+        ))}
       </div>
     </div>
   );
