@@ -1,9 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Bot, Copy, Gem, HelpCircle, RotateCcw, Share2, Shield, Swords, Wifi, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Bot, Copy, Gem, Heart, HelpCircle, RotateCcw, Share2, Shield, Swords, Wifi, X } from 'lucide-react';
 import { elementLabel } from '../game/cards';
 import { attackLane, createGame, endTurn, playSelectedCard, runCpuTurn, selectHand } from '../game/engine';
 import { createShareUrl, loadRoomSnapshot, saveRoomSnapshot } from '../game/online';
 import type { BoardUnit, Card, GameState, Lane, PlayerId } from '../game/types';
+
+type ActionKind = 'shield' | 'health' | 'trap' | 'mana';
+
+interface ActionEffect {
+  id: string;
+  key: string;
+  kind: ActionKind;
+  label: string;
+}
 
 function initialGame(): GameState {
   const params = new URLSearchParams(window.location.search);
@@ -14,10 +23,25 @@ function initialGame(): GameState {
 export function App() {
   const [game, setGame] = useState<GameState>(() => initialGame());
   const [showRules, setShowRules] = useState(false);
+  const [actionEffects, setActionEffects] = useState<ActionEffect[]>([]);
+  const previousGame = useRef<GameState | null>(null);
   const active = game.players[game.activePlayer];
   const player = game.players.player;
   const selected = game.selectedHandIndex === null ? null : active.hand[game.selectedHandIndex];
   const shareUrl = useMemo(() => createShareUrl(game.roomCode), [game.roomCode]);
+
+  useEffect(() => {
+    const previous = previousGame.current;
+    previousGame.current = game;
+    if (!previous) return;
+
+    const nextEffects = detectActionEffects(previous, game);
+    if (nextEffects.length === 0) return;
+
+    setActionEffects(nextEffects);
+    const timer = window.setTimeout(() => setActionEffects([]), 1100);
+    return () => window.clearTimeout(timer);
+  }, [game]);
 
   useEffect(() => {
     if (game.mode === 'online') saveRoomSnapshot(game);
@@ -69,12 +93,12 @@ export function App() {
       </section>
 
       <section className="status-grid">
-        <PlayerBadge side="opponent" state={game} />
+        <PlayerBadge side="opponent" state={game} effects={actionEffects} />
         <div className="turn-pill">
           <Swords size={17} />
           <span>{game.phase === 'finished' ? '決着' : `${active.name} / T${game.turn}`}</span>
         </div>
-        <PlayerBadge side="player" state={game} />
+        <PlayerBadge side="player" state={game} effects={actionEffects} />
       </section>
 
       {game.mode === 'online' && (
@@ -94,7 +118,7 @@ export function App() {
       )}
 
       <section className="battlefield">
-        <PlayerBoard playerId="opponent" state={game} />
+        <PlayerBoard playerId="opponent" state={game} effects={actionEffects} />
         <div className="lane-actions">
           {[0, 1, 2].map((lane) => (
             <button
@@ -107,7 +131,7 @@ export function App() {
             </button>
           ))}
         </div>
-        <PlayerBoard playerId="player" state={game} />
+        <PlayerBoard playerId="player" state={game} effects={actionEffects} />
       </section>
 
       <section className="hand-panel">
@@ -116,7 +140,7 @@ export function App() {
             <p className="eyebrow">Hand</p>
             <h2>{selected ? `${selected.name} を配置` : 'カードを選択'}</h2>
           </div>
-          <ManaPanel current={player.mana} />
+          <ManaPanel current={player.mana} flash={hasEffect(actionEffects, 'player-mana')} />
           <button disabled={!canAct} onClick={() => setGame((current) => endTurn(current))}>
             ターン終了
           </button>
@@ -149,9 +173,57 @@ export function App() {
           <p key={`${entry}-${index}`}>{entry}</p>
         ))}
       </aside>
+      {actionEffects.length > 0 && (
+        <div className="action-stack" aria-live="polite">
+          {actionEffects.map((effect) => (
+            <div className={`action-toast ${effect.kind}`} key={effect.id}>
+              {effect.label}
+            </div>
+          ))}
+        </div>
+      )}
       {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
     </main>
   );
+}
+
+function detectActionEffects(previous: GameState, next: GameState): ActionEffect[] {
+  const effects: ActionEffect[] = [];
+  const sides: PlayerId[] = ['player', 'opponent'];
+
+  for (const side of sides) {
+    const before = previous.players[side];
+    const after = next.players[side];
+    const name = after.name;
+
+    if (after.shields.length < before.shields.length) {
+      effects.push(createEffect(`${side}-shield`, 'shield', `${name}のシールド破壊`));
+    }
+    if (after.health < before.health) {
+      effects.push(createEffect(`${side}-health`, 'health', `${name}のHP減少`));
+    }
+    if (before.trap && !after.trap) {
+      effects.push(createEffect(`${side}-trap`, 'trap', `${name}のトラップ発動`));
+    }
+    if (after.mana > before.mana) {
+      effects.push(createEffect(`${side}-mana`, 'mana', `${name}のマナ追加`));
+    }
+  }
+
+  return effects;
+}
+
+function createEffect(key: string, kind: ActionKind, label: string): ActionEffect {
+  return {
+    id: `${key}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    key,
+    kind,
+    label,
+  };
+}
+
+function hasEffect(effects: ActionEffect[], key: string): boolean {
+  return effects.some((effect) => effect.key === key);
 }
 
 function RulesDialog({ onClose }: { onClose: () => void }) {
@@ -217,16 +289,17 @@ function RulesDialog({ onClose }: { onClose: () => void }) {
   );
 }
 
-function PlayerBadge({ side, state }: { side: PlayerId; state: GameState }) {
+function PlayerBadge({ side, state, effects }: { side: PlayerId; state: GameState; effects: ActionEffect[] }) {
   const player = state.players[side];
   return (
-    <div className={`player-badge ${state.activePlayer === side ? 'current' : ''}`}>
+    <div className={`player-badge ${state.activePlayer === side ? 'current' : ''} ${hasEffect(effects, `${side}-health`) ? 'damage-hit' : ''}`}>
       <div className="player-nameplate">
         <strong>{player.name}</strong>
       </div>
       <div className="badge-resources">
-        <ResourceMeter icon="mana" label="Mana" current={player.mana} max={10} />
-        <ResourceMeter icon="shield" label="Shield" current={player.shields.length} max={5} />
+        <ResourceMeter icon="life" label="HP" current={player.health} max={5} flash={hasEffect(effects, `${side}-health`)} />
+        <ResourceMeter icon="mana" label="Mana" current={player.mana} max={10} flash={hasEffect(effects, `${side}-mana`)} />
+        <ResourceMeter icon="shield" label="Shield" current={player.shields.length} max={5} flash={hasEffect(effects, `${side}-shield`)} />
       </div>
     </div>
   );
@@ -237,16 +310,20 @@ function ResourceMeter({
   label,
   current,
   max,
+  flash,
 }: {
-  icon: 'mana' | 'shield';
+  icon: 'life' | 'mana' | 'shield';
   label: string;
   current: number;
   max: number;
+  flash?: boolean;
 }) {
   return (
-    <div className={`resource-meter ${icon}`} aria-label={`${label} ${current}/${max}`}>
+    <div className={`resource-meter ${icon} ${flash ? 'flash' : ''}`} aria-label={`${label} ${current}/${max}`}>
       <div className="resource-label">
-        {icon === 'mana' ? <Gem size={14} /> : <Shield size={14} />}
+        {icon === 'life' && <Heart size={14} />}
+        {icon === 'mana' && <Gem size={14} />}
+        {icon === 'shield' && <Shield size={14} />}
         <span>{label}</span>
         <strong>
           {current}/{max}
@@ -261,9 +338,9 @@ function ResourceMeter({
   );
 }
 
-function ManaPanel({ current }: { current: number }) {
+function ManaPanel({ current, flash }: { current: number; flash?: boolean }) {
   return (
-    <div className="mana-panel" aria-label={`現在のマナ ${current}`}>
+    <div className={`mana-panel ${flash ? 'flash' : ''}`} aria-label={`現在のマナ ${current}`}>
       <div className="mana-head">
         <Gem size={16} />
         <strong>{current}</strong>
@@ -278,10 +355,10 @@ function ManaPanel({ current }: { current: number }) {
   );
 }
 
-function PlayerBoard({ playerId, state }: { playerId: PlayerId; state: GameState }) {
+function PlayerBoard({ playerId, state, effects }: { playerId: PlayerId; state: GameState; effects: ActionEffect[] }) {
   const player = state.players[playerId];
   return (
-    <div className={`board ${playerId}`}>
+    <div className={`board ${playerId} ${hasEffect(effects, `${playerId}-trap`) ? 'trap-burst' : ''}`}>
       <div className="board-meta">
         <span>{player.name}</span>
         <span>Deck {player.deck.length}</span>
