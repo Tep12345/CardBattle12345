@@ -595,7 +595,7 @@ button:disabled {
 }
 
 .hand-card {
-  min-width: 174px;
+  min-width: 224px;
   cursor: pointer;
   transition:
     transform 170ms ease,
@@ -715,10 +715,10 @@ button:disabled {
 }
 
 .hand-card p {
-  min-height: 36px;
+  min-height: 58px;
   color: rgba(255, 255, 255, 0.84);
-  font-size: 0.74rem;
-  line-height: 1.32;
+  font-size: 0.8rem;
+  line-height: 1.42;
 }
 
 .volt p {
@@ -1097,20 +1097,20 @@ button:disabled {
     border-radius: 8px 8px 0 0;
     border-bottom: 0;
     padding: 10px 10px max(10px, env(safe-area-inset-bottom));
-    max-height: 40vh;
-    overflow: hidden;
+    max-height: 58vh;
+    overflow: visible;
   }
 
   .hand-card {
-    min-width: 164px;
-    min-height: 218px;
-    max-height: 246px;
+    min-width: 224px;
+    min-height: 314px;
+    max-height: none;
   }
 
   .hand-card p {
-    min-height: 0;
-    max-height: 2.7em;
-    overflow: hidden;
+    min-height: 74px;
+    max-height: none;
+    overflow: visible;
   }
 
   .hand {
