@@ -1,5 +1,13 @@
 import type { Card } from './types';
 
+export type DeckId = 'balanced' | 'flame' | 'tide' | 'fortress' | 'cavalry' | 'dragon';
+
+export interface DeckProfile {
+  id: DeckId;
+  name: string;
+  summary: string;
+}
+
 export const library: Card[] = [
   {
     id: 'ember-scout',
@@ -96,8 +104,17 @@ export const library: Card[] = [
   },
 ];
 
-export function buildStarterDeck(): Card[] {
-  const ids = [
+export const deckCatalog: DeckProfile[] = [
+  { id: 'balanced', name: '王道軍', summary: '攻防の標準型' },
+  { id: 'flame', name: '火矢軍', summary: '速攻と火力' },
+  { id: 'tide', name: '水軍策士', summary: '手札補充重視' },
+  { id: 'fortress', name: '城塞守備', summary: '高HPで耐える' },
+  { id: 'cavalry', name: '雷騎突撃', summary: '速攻武将中心' },
+  { id: 'dragon', name: '黒龍覇道', summary: '大型進化狙い' },
+];
+
+const deckLists: Record<DeckId, string[]> = {
+  balanced: [
     'ember-scout',
     'ember-scout',
     'tide-adept',
@@ -114,7 +131,101 @@ export function buildStarterDeck(): Card[] {
     'terra-root',
     'mirror-trap',
     'mirror-trap',
-  ];
+  ],
+  flame: [
+    'ember-scout',
+    'ember-scout',
+    'ember-scout',
+    'volt-runner',
+    'volt-runner',
+    'terra-warden',
+    'void-dragon',
+    'ember-burst',
+    'ember-burst',
+    'ember-burst',
+    'terra-root',
+    'terra-root',
+    'tide-recall',
+    'mirror-trap',
+    'mirror-trap',
+    'mirror-trap',
+  ],
+  tide: [
+    'tide-adept',
+    'tide-adept',
+    'tide-adept',
+    'terra-warden',
+    'terra-warden',
+    'ember-scout',
+    'volt-runner',
+    'void-dragon',
+    'tide-recall',
+    'tide-recall',
+    'tide-recall',
+    'ember-burst',
+    'terra-root',
+    'mirror-trap',
+    'mirror-trap',
+    'mirror-trap',
+  ],
+  fortress: [
+    'terra-warden',
+    'terra-warden',
+    'terra-warden',
+    'tide-adept',
+    'tide-adept',
+    'ember-scout',
+    'void-dragon',
+    'void-dragon',
+    'terra-root',
+    'terra-root',
+    'terra-root',
+    'tide-recall',
+    'ember-burst',
+    'mirror-trap',
+    'mirror-trap',
+    'mirror-trap',
+  ],
+  cavalry: [
+    'volt-runner',
+    'volt-runner',
+    'volt-runner',
+    'ember-scout',
+    'ember-scout',
+    'tide-adept',
+    'terra-warden',
+    'void-dragon',
+    'ember-burst',
+    'ember-burst',
+    'terra-root',
+    'terra-root',
+    'tide-recall',
+    'mirror-trap',
+    'mirror-trap',
+    'mirror-trap',
+  ],
+  dragon: [
+    'void-dragon',
+    'void-dragon',
+    'void-dragon',
+    'terra-warden',
+    'terra-warden',
+    'tide-adept',
+    'tide-adept',
+    'ember-scout',
+    'terra-root',
+    'terra-root',
+    'terra-root',
+    'tide-recall',
+    'tide-recall',
+    'ember-burst',
+    'mirror-trap',
+    'mirror-trap',
+  ],
+};
+
+export function buildStarterDeck(deckId: DeckId = 'balanced'): Card[] {
+  const ids = deckLists[deckId];
 
   return ids.map((id, index) => ({
     ...library.find((card) => card.id === id)!,

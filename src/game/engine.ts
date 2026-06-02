@@ -1,4 +1,4 @@
-import { buildStarterDeck, elementBeats } from './cards';
+import { buildStarterDeck, elementBeats, type DeckId } from './cards';
 import type { BoardUnit, Card, GameState, Lane, PlayerId, PlayerState } from './types';
 
 const lanes: Array<BoardUnit | null> = [null, null, null];
@@ -31,8 +31,8 @@ function draw(player: PlayerState, count = 1): PlayerState {
   return { ...player, deck, hand, discard };
 }
 
-function createPlayer(id: PlayerId, name: string): PlayerState {
-  const deck = shuffle(buildStarterDeck());
+function createPlayer(id: PlayerId, name: string, deckId: DeckId = 'balanced'): PlayerState {
+  const deck = shuffle(buildStarterDeck(deckId));
   const shields = deck.splice(0, 5);
   const base: PlayerState = {
     id,
@@ -49,11 +49,11 @@ function createPlayer(id: PlayerId, name: string): PlayerState {
   return draw(base, 5);
 }
 
-export function createGame(mode: GameState['mode'] = 'cpu'): GameState {
+export function createGame(mode: GameState['mode'] = 'cpu', playerDeck: DeckId = 'balanced'): GameState {
   const roomCode = Math.random().toString(36).slice(2, 8).toUpperCase();
   return {
     players: {
-      player: createPlayer('player', 'あなた'),
+      player: createPlayer('player', 'あなた', playerDeck),
       opponent: createPlayer('opponent', mode === 'cpu' ? 'CPU' : '対戦相手'),
     },
     activePlayer: 'player',

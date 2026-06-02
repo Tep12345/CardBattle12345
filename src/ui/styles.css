@@ -156,6 +156,7 @@ button {
 }
 
 .topbar,
+.deck-select,
 .status-grid,
 .room-band,
 .hand-panel,
@@ -440,6 +441,60 @@ button:disabled {
   gap: 8px;
 }
 
+.deck-select {
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.deck-select-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.deck-select-head strong {
+  color: #29333a;
+  font-size: 0.9rem;
+}
+
+.deck-options {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.deck-options button {
+  min-height: 56px;
+  padding: 8px;
+  border-radius: 8px;
+  display: grid;
+  gap: 3px;
+  color: #29333a;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.52);
+  border: 1px solid rgba(141, 105, 54, 0.16);
+  cursor: pointer;
+}
+
+.deck-options button.active {
+  background: linear-gradient(180deg, #ffd36f, #f6be58);
+  border-color: rgba(154, 101, 23, 0.35);
+  box-shadow: 0 8px 18px rgba(154, 101, 23, 0.18);
+}
+
+.deck-options span {
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+
+.deck-options small {
+  color: #5b6871;
+  font-size: 0.68rem;
+  line-height: 1.2;
+}
+
 .room-band div {
   display: flex;
   align-items: center;
@@ -645,6 +700,18 @@ button:disabled {
   color: inherit;
   font-size: 0.9rem;
   line-height: 1.22;
+}
+
+.unit-card .stat-row {
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.unit-card .stat-row span {
+  max-width: 100%;
+  padding: 2px 5px;
+  font-size: 0.64rem;
+  line-height: 1.1;
 }
 
 .hand-card p {
@@ -951,6 +1018,14 @@ button:disabled {
     gap: 6px;
   }
 
+  .deck-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deck-options button {
+    min-height: 50px;
+  }
+
   .turn-pill {
     order: -1;
     width: 100%;
@@ -998,7 +1073,11 @@ button:disabled {
   }
 
   .card-art.compact {
-    min-height: 48px;
+    min-height: 42px;
+  }
+
+  .unit-card h3 {
+    font-size: 0.78rem;
   }
 
   .panel-header {
@@ -1063,6 +1142,7 @@ button:disabled {
   }
 
   .topbar,
+  .deck-select,
   .status-grid,
   .room-band,
   .battlefield,

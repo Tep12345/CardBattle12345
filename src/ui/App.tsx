@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bot, Copy, Gem, Heart, HelpCircle, RotateCcw, Share2, Shield, Swords, Wifi, X } from 'lucide-react';
-import { elementLabel } from '../game/cards';
+import { deckCatalog, elementLabel, type DeckId } from '../game/cards';
 import { attackLane, createGame, endTurn, playSelectedCard, runCpuTurn, selectHand } from '../game/engine';
 import { createShareUrl, loadRoomSnapshot, saveRoomSnapshot } from '../game/online';
 import type { BoardUnit, Card, GameState, Lane, PlayerId } from '../game/types';
@@ -24,6 +24,7 @@ function initialGame(): GameState {
 
 export function App() {
   const [game, setGame] = useState<GameState>(() => initialGame());
+  const [selectedDeck, setSelectedDeck] = useState<DeckId>('balanced');
   const [showRules, setShowRules] = useState(false);
   const [actionEffects, setActionEffects] = useState<ActionEffect[]>([]);
   const previousGame = useRef<GameState | null>(null);
@@ -55,10 +56,15 @@ export function App() {
     return () => window.clearTimeout(timer);
   }, [game.activePlayer, game.mode, game.phase]);
 
-  function start(mode: GameState['mode']) {
-    const next = createGame(mode);
+  function start(mode: GameState['mode'], deckId = selectedDeck) {
+    const next = createGame(mode, deckId);
     setGame(next);
     if (mode === 'online') saveRoomSnapshot(next);
+  }
+
+  function chooseDeck(deckId: DeckId) {
+    setSelectedDeck(deckId);
+    start(game.mode, deckId);
   }
 
   function copyRoom() {
@@ -91,6 +97,21 @@ export function App() {
             <HelpCircle size={18} />
             <span>Rules</span>
           </button>
+        </div>
+      </section>
+
+      <section className="deck-select" aria-label="deck selection">
+        <div className="deck-select-head">
+          <p className="eyebrow">Deck</p>
+          <strong>{deckCatalog.find((deck) => deck.id === selectedDeck)?.name}</strong>
+        </div>
+        <div className="deck-options">
+          {deckCatalog.map((deck) => (
+            <button className={deck.id === selectedDeck ? 'active' : ''} key={deck.id} onClick={() => chooseDeck(deck.id)}>
+              <span>{deck.name}</span>
+              <small>{deck.summary}</small>
+            </button>
+          ))}
         </div>
       </section>
 
